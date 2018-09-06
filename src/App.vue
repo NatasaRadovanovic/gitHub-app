@@ -16,6 +16,10 @@
 
   <div class="center">
     <app-search :query.sync="query"/>
+
+    <!--<div v-for="repo in repos" :key="repo.id">
+      {{ repo }}
+    </div>-->
   </div>
   
 
@@ -25,6 +29,7 @@
 <script>
 import AppToolbar from './components/AppToolbar'
 import AppSearch from './components/AppSearch'
+import { gitService } from './services/GitHub'
 
 export default {
 
@@ -34,15 +39,23 @@ export default {
  },
  data(){
    return{
-     query:''
+     query:'',
+     repos:[]
    }
  },
 
- /*watch:{
+  created(){
+    gitService.getRepos()
+    .then(response => (this.repos = response.data))
+    .catch(err =>console.log(err))
+  },
+ 
+
+  watch:{
    query(newValue){
      console.log(newValue)
    }
- }*/
+ }
 
 }
 </script>
