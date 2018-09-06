@@ -17,9 +17,9 @@
   <div class="center">
     <app-search :query.sync="query"/>
 
-    <!--<div v-for="repo in repos" :key="repo.id">
-      {{ repo }}
-    </div>-->
+    <div v-for="repo in repos" :key="repo.id">
+      {{ repo.name }}
+    </div>
   </div>
   
 
@@ -30,6 +30,8 @@
 import AppToolbar from './components/AppToolbar'
 import AppSearch from './components/AppSearch'
 import { gitService } from './services/GitHub'
+
+import debounce from 'lodash/debounce'
 
 export default {
 
@@ -44,17 +46,28 @@ export default {
    }
  },
 
-  created(){
+ /* created(){
     gitService.getRepos()
     .then(response => (this.repos = response.data))
     .catch(err =>console.log(err))
-  },
+  },*/
  
 
-  watch:{
+  /*watch:{
    query(newValue){
      console.log(newValue)
    }
+ }*/
+
+ watch:{
+   query: debounce(function(newValue){
+     gitService.getRepos(newValue)
+     .then((response) => {
+       this.repos = response.data
+       console.log(this.repos)
+     })
+   }, 1000)
+
  }
 
 }
