@@ -12,7 +12,9 @@
   <div class="center">
     <app-search :query.sync="query"/>
 
-    <empty-state v-if="repos.length <= 0" type='Repository'/>
+    <empty-state v-if="isEmpty" type='Repository'/>
+
+    <error v-if="userExist"/>
 
   <v-ons-list>
       <v-ons-list-header>Repositories of {{ query }}</v-ons-list-header>
@@ -38,6 +40,7 @@ import AppToolbar from './components/AppToolbar'
 import AppSearch from './components/AppSearch'
 import { gitService } from './services/GitHub'
 import EmptyState from './components/EmptyState'
+import Error from './components/Error'
 
 import debounce from 'lodash/debounce'
 
@@ -47,12 +50,15 @@ export default {
    AppToolbar,
    AppSearch,
    EmptyState,
+   Error,
  },
  data(){
    return{
      query:'',
      repos:[],
      loading:false,
+     isEmpty:false,
+     userExist:false,
 
    }
  },
@@ -72,12 +78,22 @@ export default {
 
  watch:{
    query: debounce(function(newValue){
+      this.userExist = false
      this.loading = true
      gitService.getRepos(newValue)
      .then((response) => {
+       if(response.data.length <= 0){
+         this.isEmpty = true
+         return;
+       }
+        this.isEmpty = false
         this.repos = response.data
         console.log(this.repos)
-    }).catch(error => {console.log(error)})
+    }).catch(error => {
+      if (error.response.status === 404 ) {
+            this.userExist = true
+        }
+    })
      .finally(() => {
        this.loading = false
      })
