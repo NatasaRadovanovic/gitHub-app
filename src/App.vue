@@ -12,9 +12,9 @@
   <div class="center">
     <app-search :query.sync="query"/>
 
-     
-   
-   <v-ons-list>
+    <empty-state v-if="repos.length <= 0" type='Repository'/>
+
+  <v-ons-list>
       <v-ons-list-header>Repositories of {{ query }}</v-ons-list-header>
        <p>
         <v-ons-progress-circular indeterminate v-if="loading"></v-ons-progress-circular>
@@ -37,6 +37,7 @@
 import AppToolbar from './components/AppToolbar'
 import AppSearch from './components/AppSearch'
 import { gitService } from './services/GitHub'
+import EmptyState from './components/EmptyState'
 
 import debounce from 'lodash/debounce'
 
@@ -45,12 +46,14 @@ export default {
  components: {
    AppToolbar,
    AppSearch,
+   EmptyState,
  },
  data(){
    return{
      query:'',
      repos:[],
-     loading:false
+     loading:false,
+
    }
  },
 
@@ -72,9 +75,9 @@ export default {
      this.loading = true
      gitService.getRepos(newValue)
      .then((response) => {
-       this.repos = response.data
-       console.log(this.repos)
-     }).catch(error => {console.log(error)})
+        this.repos = response.data
+        console.log(this.repos)
+    }).catch(error => {console.log(error)})
      .finally(() => {
        this.loading = false
      })
