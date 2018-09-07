@@ -7,12 +7,18 @@
         </v-ons-button>
       </template>
    </app-toolbar>
+   
 
   <div class="center">
     <app-search :query.sync="query"/>
 
+     
+   
    <v-ons-list>
       <v-ons-list-header>Repositories of {{ query }}</v-ons-list-header>
+       <p>
+        <v-ons-progress-circular indeterminate v-if="loading"></v-ons-progress-circular>
+      </p>
         <v-ons-list-item v-for="repo in repos" :key="repo.id" >
 
     <div class="left">
@@ -22,7 +28,7 @@
           <span class="list-item__title">{{ repo.name }}</span><span class="list-item__subtitle">{{ repo.description }}</span>
         </div>
        </v-ons-list-item>
-    </v-ons-list>
+    </v-ons-list> 
   </div>
   </v-ons-page>
 </template>
@@ -43,7 +49,8 @@ export default {
  data(){
    return{
      query:'',
-     repos:[]
+     repos:[],
+     loading:false
    }
  },
 
@@ -62,10 +69,14 @@ export default {
 
  watch:{
    query: debounce(function(newValue){
+     this.loading = true
      gitService.getRepos(newValue)
      .then((response) => {
        this.repos = response.data
        console.log(this.repos)
+     }).catch(error => {console.log(error)})
+     .finally(() => {
+       this.loading = false
      })
    }, 1000)
 
